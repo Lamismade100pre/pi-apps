@@ -16,3 +16,23 @@ if [ $? != 0 ]; then
     error "Failed to install brave-browser."
   fi
 fi
+
+#detect if Widevine can be enabled
+if package_available libwidevinecdm0;then
+  description="Make Widevine DRM (for Netflix, Spotify) available to Brave?
+
+You will still need to enable Widevine inside of Brave in brave://settings/extensions"
+  userinput_func "$description" "Yes, make Widevine DRM available" "No, do not make Widevine DRM available."
+  if [ "$output" == "Yes, make Widevine DRM available" ]; then
+    install_packages libwidevinecdm0 || exit 1
+  fi
+fi
+
+# make widevine available if it is installed
+if [ -d /opt/chromium.org/chromium/WidevineCdm ]; then
+  mkdir -p ~/.config/BraveSoftware/Brave-Browser/WidevineCdm
+  echo '{"Path":"/opt/chromium.org/chromium/WidevineCdm"}' > ~/.config/BraveSoftware/Brave-Browser/WidevineCdm/latest-component-updated-widevine-cdm
+elif [ -d /opt/WidevineCdm ]; then
+  mkdir -p ~/.config/BraveSoftware/Brave-Browser/WidevineCdm
+  echo '{"Path":"/opt/WidevineCdm"}' > ~/.config/BraveSoftware/Brave-Browser/WidevineCdm/latest-component-updated-widevine-cdm
+fi
